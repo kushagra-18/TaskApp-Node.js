@@ -1,4 +1,6 @@
 
+const jwt = require('jsonwebtoken');
+
 /**
  * @description - Helper function to validate if the options
  * are allowed to be updated or not
