@@ -1,4 +1,5 @@
 const express = require("express");
+const auth = require("../middlewares/auth");
 const { model } = require("mongoose");
 const Task = require("../models/task");
 const {validateHelper} = require("../utils/helpers");
@@ -12,8 +13,11 @@ const router = new express.Router();
    * @returns {object} - Returns the task object
    */
   
-  router.post("/tasks", async (req, res) => {
-    const task = new Task(req.body);
+  router.post("/tasks", auth, async (req, res) => {
+    const task = new Task({
+      ...req.body,
+      userId: req.user._id,
+    });
   
     try {
       await task.save();

@@ -31,6 +31,32 @@ const userSchema = new mongoose.Schema({
 });
 
 /**
+ * @description virtual property
+ */
+
+userSchema.virtual('tasks',{
+  ref : 'Task',
+  localField : '_id',
+  foreignField : 'userId'
+})
+
+/**
+ * @description Function used to hide the password and tokens
+ */
+
+userSchema.methods.toJSON = function(){
+  
+  const user = this;
+  const userObject = user.toObject();
+
+  delete userObject.password;
+  delete userObject.token;
+
+  return userObject;
+
+}
+
+/**
  * @description - This function is used to create or verify jwt token
  */
 

@@ -12,10 +12,8 @@ const router = new express.Router();
  * @returns {object} - Returns the user object
  */
 
-router.post("/users/login",auth, async (req, res) => {
-  
-  
-    try {
+router.post("/users/login", async (req, res) => {
+  try {
     const user = await User.findByCredentials(
       req.body.email,
       req.body.password
@@ -24,7 +22,6 @@ router.post("/users/login",auth, async (req, res) => {
     const token = await user.generateAuthTokens();
 
     res.send(user);
-
   } catch (error) {
     res.status(500).send(error);
   }
@@ -39,7 +36,7 @@ router.post("/users/login",auth, async (req, res) => {
  * @throws {object} - Returns an error object
  */
 
-router.post("/users",auth, async (req, res) => {
+router.post("/users", async (req, res) => {
   const user = new User(req.body);
 
   const token = await user.generateAuthTokens();
@@ -58,7 +55,7 @@ router.post("/users",auth, async (req, res) => {
  * @throws {object} - Returns an error object
  */
 
-router.get("/users/me",auth,async (req, res) => {
+router.get("/users/me", auth, async (req, res) => {
   try {
     res.send(req.user);
   } catch {
@@ -71,7 +68,7 @@ router.get("/users/me",auth,async (req, res) => {
  * @param {string} req.params.id - The id of the user
  */
 
-router.get("/users/:id", async (req, res) => {
+router.get("/users/:id", auth, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
 
@@ -92,7 +89,7 @@ router.get("/users/:id", async (req, res) => {
  * @returns {object} - Returns the user object along with the status code
  */
 
-router.patch("/users/:id", async (req, res) => {
+router.patch("/users/:id", auth, async (req, res) => {
   const allowedUpdates = ["name", "email", "password", "age"];
   const updates = Object.keys(req.body);
 
@@ -118,22 +115,34 @@ router.patch("/users/:id", async (req, res) => {
 });
 
 /**
- * @description - This route is used to delete the task by id
- * @param {string} req.params.id - The id of the task
+ * @description - This route is used to delete the users by id
  * @returns {object} - Returns the task object
  */
 
-router.delete("/users/:id", async (req, res) => {
+router.delete("/users/me", auth, async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
+    const user = await User.findByIdAndDelete(req.user._id);
 
-    if (!user) {
-      return res.status(404).send();
-    }
-
-    return res.status(200).send(user);
+    return res.status(200).send(req.user);
   } catch (error) {
     return res.status(500).send(error);
+  }
+});
+
+/**
+ * @description - This route is used to logout the user
+ */
+
+router.post("user/logout", auth, async (req, res) => {
+  try {
+    req.user.tokens = req.user.tokens.filter((token) => {
+      return token.token !== req.token;
+    });
+
+    await req.user.save();
+    res.send()
+  } catch (error) {
+    res.status(500).send(error);
   }
 });
 
