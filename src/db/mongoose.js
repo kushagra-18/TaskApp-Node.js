@@ -7,6 +7,11 @@ mongoose.connect("mongodb://127.0.0.1:27017/task-manager", {
 });
 
 
+const deleteTaskAndCount = async (id) => {
+  const task = await Task.findByIdAndDelete(id);
+  const count = await Task.countDocuments({ completed: false });
+  return count;
+}
 
 // const me = new User({
 //   name: "Kushagra",
